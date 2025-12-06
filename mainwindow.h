@@ -7,14 +7,14 @@
 #include <QMessageBox>
 #include <QString>
 #include <QTimer>
-#include <QVector>  // <-- Đã thêm thư viện QVector
-#include <QDoubleValidator> // <-- Thêm thư viện này để kiểm tra số
+#include <QVector>
+#include <QDoubleValidator>
 
 // export data
 #include <QFile>
 #include <QTextStream>
 #include <QFileDialog>
-#include <QDateTime> // Để lấy tên file theo ngày giờ
+#include <QDateTime>
 
 #include "qcustomplot.h"
 
@@ -32,6 +32,9 @@ public:
     ~MainWindow();
 
 private slots:
+
+    QString formatData(QString dataStr);
+
     void on_connect_butt_clicked();
 
     void init_window();
@@ -68,6 +71,14 @@ private slots:
 
     void on_dir_bt_clicked();
 
+    void update_gui_loop();
+
+    void on_start_bt_clicked();
+
+    void on_speed_bt_clicked();
+
+    void on_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -75,15 +86,16 @@ private:
     QSerialPortInfo info;
     QTimer timer;
     QTimer check_alive_timer;
+    QTimer *render_timer;
+
     QList<QSerialPortInfo> ports;
     bool init = true;
     bool stop = false;
-    // --- ĐÃ SỬA ĐOẠN NÀY TỪ QList SANG QVector ---
     QVector<double> timeBuff, valueBuff, refBuff;
     QVector<double> atimeBuff, avalueBuff, arefBuff;
     QVector<double> aErrorBuff;
 
-    QVector<double> errorBuff; // Vector chứa sai số
+    QVector<double> errorBuff;
 
 
     // ---------------------------------------------
@@ -92,4 +104,4 @@ private:
     float         refValue;
     QString       check_alive;
 };
-#endif // MAINWINDOW_H
+#endif

@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include <algorithm>
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -17,7 +18,25 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(&serial, &QSerialPort::errorOccurred, this,&MainWindow::serialError);
     connect(&serial,SIGNAL(readyRead()),this,SLOT(receive_data()));
+
+
+    render_timer = new QTimer(this);
+    render_timer->setInterval(33);
+    connect(render_timer, &QTimer::timeout, this, &MainWindow::update_gui_loop);
+    render_timer->start();
+
+
+
 }
+
+QString MainWindow::formatData(QString dataStr) {
+
+    return QString("%1").arg(dataStr, 15, QChar('0'));
+}
+
+
+
+
 
 MainWindow::~MainWindow()
 {
@@ -108,7 +127,7 @@ void MainWindow::init_window()
     plotConfig();
     init = false;
 
-    QString guide = ">= 0 only";
+    QString guide = ">= 0";
     ui->kp_tb->setPlaceholderText(guide);
     ui->ki_tb->setPlaceholderText(guide);
     ui->kd_tb->setPlaceholderText(guide);
@@ -117,13 +136,13 @@ void MainWindow::init_window()
 }
 
 
+
 void MainWindow::receive_data()
 {
     while (serial.canReadLine()) {
         QByteArray data = serial.readLine();
         QString line = QString::fromUtf8(data).trimmed();
-        ui->rec_pl_tb->append(line);                // In dòng chữ ra
-        ui->rec_pl_tb->moveCursor(QTextCursor::End);
+
         QStringList parts = line.split(' ', Qt::SkipEmptyParts);
 
         if (parts.size() == 2 && parts[0] == "SPD") {
@@ -132,11 +151,7 @@ void MainWindow::receive_data()
 
             if (ok) {
                 float currentError = refValue - currentSpeed;
-
-                ui->val_txt->setText(QString::number(currentSpeed, 'f', 2));
-                ui->err_txt->setText(QString::number(currentError, 'f', 2));
-
-                double currentTimeSec = (double)tick_timer.elapsed() / 1000.0; //ms
+                double currentTimeSec = (double)tick_timer.elapsed() / 1000.0;
 
                 valueBuff.append(currentSpeed);
                 refBuff.append(refValue);
@@ -148,17 +163,49 @@ void MainWindow::receive_data()
                 atimeBuff.append(currentTimeSec);
                 aErrorBuff.append(currentError);
 
-                if (valueBuff.size() > 10000) {
-                    valueBuff.removeFirst();
-                    refBuff.removeFirst();
-                    errorBuff.removeFirst();
-                    timeBuff.removeFirst();
+                if (valueBuff.size() > 100000) {
+                    int removeCount = 10;
+                    valueBuff.remove(0, removeCount);
+                    refBuff.remove(0, removeCount);
+                    errorBuff.remove(0, removeCount);
+                    timeBuff.remove(0, removeCount);
                 }
-                plotRespond();
+
             }
         }
     }
 }
+
+void MainWindow::update_gui_loop()
+{
+    if (timeBuff.isEmpty() || stop) return;
+
+    ui->val_txt->setText(QString::number(valueBuff.last(), 'f', 2));
+    ui->err_txt->setText(QString::number(errorBuff.last(), 'f', 2));
+
+
+    ui->plot->setNotAntialiasedElements(QCP::aeAll);
+    ui->plotError->setNotAntialiasedElements(QCP::aeAll);
+
+    ui->plot->graph(0)->setData(timeBuff, refBuff);
+    ui->plot->graph(1)->setData(timeBuff, valueBuff);
+
+    double key = timeBuff.last();
+    ui->plot->xAxis->setRange(key, 8, Qt::AlignRight);
+    ui->plot->yAxis->rescale(true);
+
+    ui->plot->replot(QCustomPlot::rpQueuedReplot);
+
+    ui->plotError->graph(0)->setData(timeBuff, errorBuff);
+    ui->plotError->xAxis->setRange(key, 8, Qt::AlignRight);
+    ui->plotError->yAxis->rescale(true);
+    ui->plotError->replot(QCustomPlot::rpQueuedReplot);
+}
+
+
+
+
+
 
 void MainWindow::aliveChecking()
 {
@@ -216,28 +263,53 @@ void MainWindow::plotConfig()
 }
 
 void MainWindow::plotRespond() {
-    if(!stop)
+    if(!stop && !valueBuff.isEmpty() && !timeBuff.isEmpty())
     {
+        ui->plot->setNotAntialiasedElements(QCP::aeAll);
+        ui->plotError->setNotAntialiasedElements(QCP::aeAll);
+
         ui->plot->graph(0)->setData(timeBuff, refBuff);
         ui->plot->graph(1)->setData(timeBuff, valueBuff);
-        ui->plot->rescaleAxes();
-        ui->plot->replot();
-        ui->plot->update();
-
         ui->plotError->graph(0)->setData(timeBuff, errorBuff);
-        ui->plotError->rescaleAxes();
-        ui->plotError->replot();
-        ui->plotError->update();
+
+        double currentTime = timeBuff.last();
+        ui->plot->xAxis->setRange(0, currentTime);
+        ui->plotError->xAxis->setRange(0, currentTime);
+
+
+        double maxVal = 0;
+        if (!valueBuff.isEmpty() && !refBuff.isEmpty()) {
+            double maxSpeed = *std::max_element(valueBuff.begin(), valueBuff.end());
+            double maxRef = *std::max_element(refBuff.begin(), refBuff.end());
+            maxVal = std::max(maxSpeed, maxRef);
+        }
+        if (maxVal < 100) maxVal = 100;
+
+        ui->plot->yAxis->setRange(0, maxVal * 1.1);
+
+        double maxErr = 0;
+        if (!errorBuff.isEmpty()) {
+            auto res = std::minmax_element(errorBuff.begin(), errorBuff.end());
+            maxErr = std::max(std::abs(*res.first), std::abs(*res.second));
+        }
+        if (maxErr < 5) maxErr = 5;
+
+        ui->plotError->yAxis->setRange(-maxErr * 1.1, maxErr * 1.1);
+
+        ui->plot->replot(QCustomPlot::rpQueuedReplot);
+        ui->plotError->replot(QCustomPlot::rpQueuedReplot);
+
+        ui->val_txt->setText(QString::number(valueBuff.last(), 'f', 2));
+        ui->err_txt->setText(QString::number(errorBuff.last(), 'f', 2));
     }
 }
-
 
 void MainWindow::on_connect_butt_clicked()
 {
     if (ui->connect_butt->text() == "CONNECT")
     {
         serial.setPortName(ui->port_cb->currentText());
-        // để debug serial.setPortName("/dev/pts/2");
+        // để ben linux debug serial.setPortName("/dev/pts/2");
         serial.setBaudRate(ui->baud_cb->currentText().toInt());
 
         QString dataBits = ui->dataBit_cb->currentText();
@@ -265,9 +337,9 @@ void MainWindow::on_connect_butt_clicked()
 
             ui->spid_tb->setStyleSheet("color: #4CAF50; font-weight: bold;");
             ui->stop_bt->setStyleSheet("color: #d32f2f; font-weight: bold;");
-            // ui->dir_bt->setStyleSheet("font-weight: bold;");         Xấu
-            // ui->pwm_bt->setStyleSheet("font-weight: bold;");
-            // ui->export_bt->setStyleSheet("font-weight: bold;");
+             ui->dir_bt->setStyleSheet("font-weight: bold;");
+             ui->pwm_bt->setStyleSheet("font-weight: bold;");
+             ui->export_bt->setStyleSheet("font-weight: bold;");
 
             ui->port_cb->setDisabled(true);
             ui->baud_cb->setDisabled(true);
@@ -348,45 +420,97 @@ void MainWindow::on_connect_butt_clicked()
     }
 }
 
+
+
 void MainWindow::on_stop_bt_clicked()
 {
     stop = true;
-    QString mess = "STOP \r\n";
-    serial.write(mess.toUtf8());
-    ui->trans_pl_tb->append(mess);
+    QString msg = "M_STP" + formatData("0");
+    serial.write((msg ).toUtf8());
+
+    ui->trans_pl_tb->append(msg);
 
     tick_timer.elapsed();
     preTime = 0;
 }
 
+
+
+
+
+
+
+
+
+
+// void MainWindow::on_stop_bt_clicked()
+// {
+//     stop = true;
+//     QString mess = "STOP \r\n";
+//     serial.write(mess.toUtf8());
+//     ui->trans_pl_tb->append(mess);
+
+//     tick_timer.elapsed();
+//     preTime = 0;
+// }
+
+
+
+
 void MainWindow::on_spid_tb_clicked()
 {
-    stop = false;
-
-    refBuff.clear(); timeBuff.clear();
-    valueBuff.clear(); errorBuff.clear();
-
-    arefBuff.clear(); atimeBuff.clear();
-    avalueBuff.clear(); aErrorBuff.clear();
-
-
-    tick_timer.restart();
-
     float kpValue = ui->kp_tb->text().toFloat();
     float kiValue = ui->ki_tb->text().toFloat();
     float kdValue = ui->kd_tb->text().toFloat();
-    float spValue = ui->sp_tb->text().toFloat();
 
-    refValue = spValue;
+    int kpInt = (int)(kpValue * 10);
+    int kiInt = (int)(kiValue * 10);
+    int kdInt = (int)(kdValue * 10);
 
-    QString msg = "SPID " + QString::number(kpValue) + " "
-                  + QString::number(kiValue) + " "
-                  + QString::number(kdValue) + " "
-                  + QString::number(spValue) + "\r\n";
+    QString rawPID = QString::number(kpInt) + QString::number(kiInt) + QString::number(kdInt);
 
-    serial.write(msg.toUtf8());
-    ui->trans_pl_tb->append(msg.trimmed());
+
+    QString msg = "M_PID" + formatData(rawPID);
+
+    serial.write((msg ).toUtf8());
+
+    ui->trans_pl_tb->append(msg);
 }
+
+
+
+// void MainWindow::on_spid_tb_clicked()
+// {
+//     stop = false;
+
+//     refBuff.clear(); timeBuff.clear();
+//     valueBuff.clear(); errorBuff.clear();
+
+//     arefBuff.clear(); atimeBuff.clear();
+//     avalueBuff.clear(); aErrorBuff.clear();
+
+
+//     tick_timer.restart();
+
+//     float kpValue = ui->kp_tb->text().toFloat();
+//     float kiValue = ui->ki_tb->text().toFloat();
+//     float kdValue = ui->kd_tb->text().toFloat();
+//     float spValue = ui->sp_tb->text().toFloat();
+
+//     refValue = spValue;
+
+//     //
+
+
+
+//     QString msg = "SPID " + QString::number(kpValue) + " "
+//                   + QString::number(kiValue) + " "
+//                   + QString::number(kdValue) + " "
+//                   + QString::number(spValue) + "\r\n";
+
+//     serial.write(msg.toUtf8());
+//     ui->trans_pl_tb->append(msg.trimmed());
+// }
 
 void MainWindow::on_trans_pl_bt_clicked()
 {
@@ -435,24 +559,101 @@ void MainWindow::on_export_bt_clicked()
     }
 }
 
+// void MainWindow::on_pwm_bt_clicked()
+// {
+
+//     QString freqText = ui->pwm_tb->text();
+//     if (freqText.isEmpty()) {
+//         freqText = "0";
+//     }
+
+//     QString msg = "SFRE " + freqText + "\r\n";
+//     serial.write(msg.toUtf8());
+//     ui->trans_pl_tb->append(msg.trimmed());
+// }
+
+
 void MainWindow::on_pwm_bt_clicked()
 {
-
     QString freqText = ui->pwm_tb->text();
-    if (freqText.isEmpty()) {
-        freqText = "0";
-    }
+    if (freqText.isEmpty()) freqText = "0";
 
-    QString msg = "SFRE " + freqText + "\r\n";
-    serial.write(msg.toUtf8());
-    ui->trans_pl_tb->append(msg.trimmed());
+    QString msg = "M_FRE" + formatData(freqText);
+    serial.write((msg).toUtf8());
+    ui->trans_pl_tb->append(msg);
 }
+
+
+// void MainWindow::on_dir_bt_clicked()
+// {
+//     QString msg = "MDIR \r\n";
+//     serial.write(msg.toUtf8());
+//     ui->trans_pl_tb->append(msg.trimmed());
+// }
 
 
 void MainWindow::on_dir_bt_clicked()
 {
-    QString msg = "MDIR \r\n";
-    serial.write(msg.toUtf8());
-    ui->trans_pl_tb->append(msg.trimmed());
+    QString msg = "M_INV" + formatData("0");
+    serial.write((msg ).toUtf8());
+    ui->trans_pl_tb->append( msg);
+}
+
+
+
+
+void MainWindow::on_start_bt_clicked()
+{
+    stop = false;
+
+     QString msg = "M_STR" + formatData("0");
+
+
+    serial.write((msg ).toUtf8());
+    ui->trans_pl_tb->append(msg);
+
+
+
+}
+
+
+void MainWindow::on_speed_bt_clicked()
+{
+    stop = false;
+
+    refBuff.clear(); timeBuff.clear();
+    valueBuff.clear(); errorBuff.clear();
+
+
+    tick_timer.restart();
+
+    float spValue = ui->sp_tb->text().toFloat();
+    refValue = spValue;
+
+    QString msg = "M_SPD" + formatData(QString::number((int)spValue));
+
+    serial.write((msg ).toUtf8());
+    ui->trans_pl_tb->append( msg);
+}
+
+
+void MainWindow::on_pushButton_clicked()
+{
+
+
+    stop = false;
+
+    refBuff.clear();
+    timeBuff.clear();
+    valueBuff.clear();
+    errorBuff.clear();
+
+    tick_timer.restart();
+
+
+    QString msg = "M_PLT" + formatData("0");
+
+    serial.write((msg ).toUtf8());
+    ui->trans_pl_tb->append(msg);
 }
 

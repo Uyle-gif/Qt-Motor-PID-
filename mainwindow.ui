@@ -263,7 +263,7 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>11</pointsize>
+      <pointsize>9</pointsize>
      </font>
     </property>
     <property name="title">
@@ -331,14 +331,14 @@
     <widget class="QLabel" name="label_10">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>140</y>
-       <width>101</width>
-       <height>17</height>
+       <x>20</x>
+       <y>130</y>
+       <width>71</width>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>Setpoint (rpm)</string>
+      <string>SP (rpm)</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="kd_tb">
@@ -377,23 +377,10 @@
       <string>STOP</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="spid_tb">
-     <property name="geometry">
-      <rect>
-       <x>200</x>
-       <y>40</y>
-       <width>91</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>START</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="export_bt">
      <property name="geometry">
       <rect>
-       <x>200</x>
+       <x>210</x>
        <y>250</y>
        <width>91</width>
        <height>31</height>
@@ -418,7 +405,7 @@
       <rect>
        <x>30</x>
        <y>190</y>
-       <width>61</width>
+       <width>71</width>
        <height>20</height>
       </rect>
      </property>
@@ -450,6 +437,45 @@
      </property>
      <property name="text">
       <string>REVERSE</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="start_bt">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>40</y>
+       <width>90</width>
+       <height>29</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>START</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="spid_tb">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>250</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>SET PID</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="speed_bt">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>250</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>SET SPEED</string>
      </property>
     </widget>
    </widget>
@@ -596,6 +622,19 @@
      </property>
     </widget>
    </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>430</y>
+      <width>90</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PLOT</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -603,7 +642,7 @@
      <x>0</x>
      <y>0</y>
      <width>1434</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
