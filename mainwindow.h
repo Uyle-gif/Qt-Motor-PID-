@@ -1,6 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#define CMD_SIZE 5
+#define DATA_SIZE 25
+
+
+
 #include <QMainWindow>
 #include <QSerialPort>
 #include <QSerialPortInfo>
@@ -17,6 +22,9 @@
 #include <QDateTime>
 
 #include "qcustomplot.h"
+
+
+
 
 
 QT_BEGIN_NAMESPACE
@@ -36,48 +44,27 @@ private slots:
     QString formatData(QString dataStr);
 
     void on_connect_butt_clicked();
-
-    void init_window();
-
-    void update_port();
-
-    void update_baundrate();
-
-    bool isPortConnected(const QSerialPortInfo &portInfo);
-
-    void serialError();
-
-    void receive_data();
-
     void on_stop_bt_clicked();
-
-    void on_spid_tb_clicked();
-
+    void on_spid_bt_clicked();
     void on_trans_pl_bt_clicked();
-
     void on_rec_pl_bt_clicked();
-
-    void plotSetting(QCustomPlot  *plot, const char* xLabel, const char * yLabel);
-
-    void plotConfig();
-
-    void plotRespond();
-
-    void aliveChecking();
-
     void on_export_bt_clicked();
-
     void on_pwm_bt_clicked();
-
     void on_dir_bt_clicked();
 
+    void init_window();
+    void update_port();
+    void update_baundrate();
+    bool isPortConnected(const QSerialPortInfo &portInfo);
+    void serialError();
+    void receive_data();
+    void plotSetting(QCustomPlot  *plot, const char* xLabel, const char * yLabel);
+    void plotConfig();
+    void aliveChecking();
     void update_gui_loop();
 
-    void on_start_bt_clicked();
-
-    void on_speed_bt_clicked();
-
-    void on_pushButton_clicked();
+    void on_watchdog_timeout();
+    void blink_error_loop();
 
 private:
     Ui::MainWindow *ui;
@@ -85,17 +72,33 @@ private:
     QSerialPort serial;
     QSerialPortInfo info;
     QTimer timer;
-    QTimer check_alive_timer;
     QTimer *render_timer;
+
+    QTimer *watchdog_timer;
+    QTimer check_alive_timer;
+    QTimer *blink_timer;
+
 
     QList<QSerialPortInfo> ports;
     bool init = true;
     bool stop = false;
+
+    float lastFilteredValue = 0.0;
+
     QVector<double> timeBuff, valueBuff, refBuff;
     QVector<double> atimeBuff, avalueBuff, arefBuff;
     QVector<double> aErrorBuff;
 
     QVector<double> errorBuff;
+
+
+    bool blink_state;
+    bool is_tx_error;
+    bool is_rx_error;
+
+    void setLedColor(QLabel *label, QString text, QString color);
+
+
 
 
     // ---------------------------------------------

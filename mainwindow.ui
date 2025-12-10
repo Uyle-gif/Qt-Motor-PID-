@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1434</width>
-    <height>716</height>
+    <width>1514</width>
+    <height>692</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,11 +17,16 @@
    <widget class="QGroupBox" name="groupBox_3">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>30</y>
+      <x>30</x>
+      <y>20</y>
       <width>221</width>
-      <height>351</height>
+      <height>411</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
     </property>
     <property name="title">
      <string>CONNECTION SETTINGS</string>
@@ -251,14 +256,53 @@
       <string>Baudrate</string>
      </property>
     </widget>
+    <widget class="QCheckBox" name="cb_show_log">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>380</y>
+       <width>161</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>SHOW DEBUG LOG</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lb_led_tx">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>340</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lb_led_rx">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>340</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>30</y>
-      <width>311</width>
-      <height>291</height>
+      <x>270</x>
+      <y>20</y>
+      <width>201</width>
+      <height>261</height>
      </rect>
     </property>
     <property name="font">
@@ -296,9 +340,9 @@
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>50</y>
+       <y>40</y>
        <width>19</width>
-       <height>17</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
@@ -367,9 +411,9 @@
     <widget class="QPushButton" name="stop_bt">
      <property name="geometry">
       <rect>
-       <x>200</x>
-       <y>80</y>
-       <width>91</width>
+       <x>110</x>
+       <y>180</y>
+       <width>81</width>
        <height>31</height>
       </rect>
      </property>
@@ -377,61 +421,12 @@
       <string>STOP</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="export_bt">
-     <property name="geometry">
-      <rect>
-       <x>210</x>
-       <y>250</y>
-       <width>91</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>EXPORT</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="pwm_tb">
-     <property name="geometry">
-      <rect>
-       <x>110</x>
-       <y>190</y>
-       <width>81</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_13">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>190</y>
-       <width>71</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Set Freq</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pwm_bt">
-     <property name="geometry">
-      <rect>
-       <x>200</x>
-       <y>190</y>
-       <width>91</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>SET FREQ</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="dir_bt">
      <property name="geometry">
       <rect>
-       <x>200</x>
-       <y>120</y>
-       <width>91</width>
+       <x>60</x>
+       <y>220</y>
+       <width>81</width>
        <height>31</height>
       </rect>
      </property>
@@ -439,43 +434,17 @@
       <string>REVERSE</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="start_bt">
+    <widget class="QPushButton" name="spid_bt">
      <property name="geometry">
       <rect>
-       <x>200</x>
-       <y>40</y>
-       <width>90</width>
-       <height>29</height>
+       <x>10</x>
+       <y>180</y>
+       <width>81</width>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
       <string>START</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="spid_tb">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>250</y>
-       <width>91</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>SET PID</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="speed_bt">
-     <property name="geometry">
-      <rect>
-       <x>110</x>
-       <y>250</y>
-       <width>91</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>SET SPEED</string>
      </property>
     </widget>
    </widget>
@@ -484,35 +453,27 @@
      <rect>
       <x>700</x>
       <y>30</y>
-      <width>671</width>
-      <height>351</height>
+      <width>781</width>
+      <height>371</height>
      </rect>
     </property>
-    <widget class="QLineEdit" name="val_txt">
-     <property name="geometry">
-      <rect>
-       <x>530</x>
-       <y>90</y>
-       <width>113</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-    </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox_2">
+   <widget class="QGroupBox" name="gb_debugLog">
     <property name="enabled">
      <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>340</y>
+      <y>300</y>
       <width>391</width>
-      <height>281</height>
+      <height>321</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
     </property>
     <property name="title">
      <string>DEBUG LOG</string>
@@ -521,7 +482,7 @@
      <set>Qt::AlignCenter</set>
     </property>
     <property name="checkable">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <widget class="QTextBrowser" name="trans_pl_tb">
      <property name="geometry">
@@ -529,7 +490,7 @@
        <x>20</x>
        <y>50</y>
        <width>171</width>
-       <height>192</height>
+       <height>211</height>
       </rect>
      </property>
     </widget>
@@ -537,7 +498,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>248</y>
+       <y>267</y>
        <width>80</width>
        <height>25</height>
       </rect>
@@ -549,19 +510,19 @@
     <widget class="QTextBrowser" name="rec_pl_tb">
      <property name="geometry">
       <rect>
-       <x>210</x>
+       <x>200</x>
        <y>51</y>
        <width>171</width>
-       <height>192</height>
+       <height>211</height>
       </rect>
      </property>
     </widget>
     <widget class="QLabel" name="label_12">
      <property name="geometry">
       <rect>
-       <x>260</x>
+       <x>250</x>
        <y>30</y>
-       <width>53</width>
+       <width>61</width>
        <height>17</height>
       </rect>
      </property>
@@ -572,8 +533,8 @@
     <widget class="QPushButton" name="rec_pl_bt">
      <property name="geometry">
       <rect>
-       <x>210</x>
-       <y>251</y>
+       <x>200</x>
+       <y>270</y>
        <width>80</width>
        <height>25</height>
       </rect>
@@ -587,7 +548,7 @@
       <rect>
        <x>70</x>
        <y>30</y>
-       <width>60</width>
+       <width>81</width>
        <height>17</height>
       </rect>
      </property>
@@ -603,37 +564,150 @@
     <property name="geometry">
      <rect>
       <x>700</x>
-      <y>390</y>
-      <width>671</width>
-      <height>281</height>
+      <y>440</y>
+      <width>781</width>
+      <height>191</height>
      </rect>
     </property>
-    <widget class="QLineEdit" name="err_txt">
+   </widget>
+   <widget class="QGroupBox" name="groupBox_4">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>20</y>
+      <width>191</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="title">
+     <string>FREQUENCY (Hz)</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <widget class="QLineEdit" name="pwm_tb">
      <property name="geometry">
       <rect>
-       <x>550</x>
-       <y>0</y>
-       <width>113</width>
+       <x>20</x>
+       <y>40</y>
+       <width>71</width>
        <height>25</height>
       </rect>
      </property>
-     <property name="readOnly">
-      <bool>true</bool>
+    </widget>
+    <widget class="QPushButton" name="pwm_bt">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>40</y>
+       <width>71</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>SET </string>
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QGroupBox" name="groupBox_5">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>430</y>
-      <width>90</width>
-      <height>29</height>
+      <x>490</x>
+      <y>110</y>
+      <width>191</width>
+      <height>171</height>
      </rect>
     </property>
-    <property name="text">
-     <string>PLOT</string>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
     </property>
+    <property name="title">
+     <string>STATUS</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <widget class="QLabel" name="label_8">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>30</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Val</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_13">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>70</y>
+       <width>31</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Error</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="export_bt">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>110</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>EXPORT</string>
+     </property>
+    </widget>
+    <widget class="QLCDNumber" name="lcd_err">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>70</y>
+       <width>64</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="digitCount">
+      <number>6</number>
+     </property>
+     <property name="segmentStyle">
+      <enum>QLCDNumber::Flat</enum>
+     </property>
+    </widget>
+    <widget class="QLCDNumber" name="lcd_val">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>30</y>
+       <width>64</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="smallDecimalPoint">
+      <bool>false</bool>
+     </property>
+     <property name="digitCount">
+      <number>6</number>
+     </property>
+     <property name="segmentStyle">
+      <enum>QLCDNumber::Flat</enum>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -641,7 +715,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1434</width>
+     <width>1514</width>
      <height>25</height>
     </rect>
    </property>

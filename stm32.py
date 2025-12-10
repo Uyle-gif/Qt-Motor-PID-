@@ -1,76 +1,101 @@
 import serial
 import time
 import random
+import re
 
-PORT_NAME = 'COM9' 
-BAUDRATE = 9600
+# ================= CẤU HÌNH =================
+# Nếu dùng Windows và com0com, hãy set port này là đầu kia của cặp COM
+# Ví dụ: Qt nối COM1 thì Python nối COM2
+SERIAL_PORT = 'COM9'  
+BAUD_RATE = 115200
 
-# 5ms = 0.005 giây -> 200Hz
-SEND_INTERVAL = 0.005 
+# Mô phỏng vật lý động cơ
+TARGET_SPEED = 0.0
+CURRENT_SPEED = 0.0
+NOISE_LEVEL = 0.5  # Độ nhiễu tín hiệu
 
-motor_state = {
-    "target": 0.0,
-    "current": 0.0,
-    "running": False,
-    "dir": 1
-}
-
-def init_serial():
+def parse_start_command(data_str):
+    """
+    Parse lệnh gửi từ Qt: M_STR + formatData("kp ki kd sp")
+    Chuỗi nhận được sẽ có dạng: "M_STR10 0.5 0 100       ..."
+    """
     try:
-        ser = serial.Serial(PORT_NAME, BAUDRATE, timeout=0.01)
-        print(f"Connected: {PORT_NAME} | Speed: {1/SEND_INTERVAL:.0f} Hz (5ms)")
-        return ser
+        # Bỏ header M_STR
+        payload = data_str.replace("M_STR", "").strip()
+        parts = payload.split()
+        if len(parts) >= 4:
+            kp = float(parts[0])
+            ki = float(parts[1])
+            kd = float(parts[2])
+            sp = float(parts[3])
+            return sp
     except Exception as e:
-        print(f"Error: {e}")
-        exit()
-
-def process_cmd(ser):
-    if ser.in_waiting > 0:
-        try:
-            line = ser.readline().decode('utf-8', errors='ignore').strip()
-            if line.startswith("SPID"):
-                parts = line.split()
-                if len(parts) >= 5:
-                    motor_state["target"] = float(parts[4])
-                    motor_state["running"] = True
-                    print(f"Start: {motor_state['target']}")
-            elif line.startswith("STOP"):
-                motor_state["running"] = False
-                motor_state["target"] = 0.0
-                print("Stop")
-            elif line.startswith("MDIR"):
-                motor_state["dir"] *= -1
-                print("Reverse")
-        except: pass
+        print(f"Parse Error: {e}")
+    return 0.0
 
 def main():
-    ser = init_serial()
-    last_time = time.perf_counter() 
+    global TARGET_SPEED, CURRENT_SPEED
+    
+    print(f"--- VIRTUAL STM32 MOTOR STARTED ON {SERIAL_PORT} ---")
+    print("Waiting for commands from Qt GUI...")
 
-    while True:
-        try:
-            process_cmd(ser)
+    try:
+        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=0.05)
+    except serial.SerialException:
+        print(f"Lỗi: Không thể mở cổng {SERIAL_PORT}. Hãy kiểm tra lại phần mềm COM ảo.")
+        return
 
-            target = motor_state["target"] if motor_state["running"] else 0.0
-            current = abs(motor_state["current"])
-            
-            inertia = 0.02 if motor_state["running"] else 0.01
-            new_val = current + (target - current) * inertia
-            motor_state["current"] = new_val * motor_state["dir"]
+    last_time = time.time()
 
-            now = time.perf_counter()
-            if now - last_time >= SEND_INTERVAL:
-                val_out = motor_state["current"] + random.uniform(-1, 1) if motor_state["running"] else 0
+    try:
+        while True:
+            # 1. ĐỌC DỮ LIỆU TỪ GUI (PC -> STM32)
+            if ser.in_waiting > 0:
+                # Qt gửi chuỗi có padding space, nên đọc chunk lớn
+                raw_data = ser.read(ser.in_waiting).decode('utf-8', errors='ignore')
+                print(f"Received: {raw_data}")
+
+                if "M_STR" in raw_data:
+                    # Lệnh START kèm tham số PID và Setpoint
+                    new_sp = parse_start_command(raw_data)
+                    TARGET_SPEED = new_sp
+                    print(f"-> COMMAND START: Setpoint = {TARGET_SPEED}")
+                    
+                elif "M_STP" in raw_data:
+                    # Lệnh STOP
+                    TARGET_SPEED = 0.0
+                    print("-> COMMAND STOP")
+
+                elif "M_INV" in raw_data:
+                    print("-> COMMAND INVERT")
+
+            # 2. MÔ PHỎNG VẬT LÝ (PID RESPONSE)
+            # Dùng công thức quán tính bậc 1 để tạo đường cong tăng tốc
+            # v = v + alpha * (target - v)
+            dt = time.time() - last_time
+            if dt > 0.02: # Update mỗi 20ms (50Hz)
+                last_time = time.time()
                 
-                msg = f"SPD {val_out:.2f}\n"
-                ser.write(msg.encode())
+                # Logic tăng tốc mềm (Inertia)
+                step = (TARGET_SPEED - CURRENT_SPEED) * 0.1
+                CURRENT_SPEED += step
+
+                # Thêm nhiễu giả lập (Noise) để giống thật
+                simulated_speed = CURRENT_SPEED + random.uniform(-NOISE_LEVEL, NOISE_LEVEL)
+
+                # 3. GỬI DỮ LIỆU VỀ GUI (STM32 -> PC)
+                # Format đúng như C++ yêu cầu: "M_PLT <float>\n"
+                msg = f"M_PLT {simulated_speed:.2f}\n"
+                ser.write(msg.encode('utf-8'))
                 
-                last_time = now
+                # In ra terminal python để debug chơi
+                # print(f"Sent: {msg.strip()}")
 
-            time.sleep(0.0001) 
+            time.sleep(0.0005) # Sleep nhỏ để giảm tải CPU
 
-        except KeyboardInterrupt:
-            break
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        ser.close()
 
 if __name__ == "__main__":
     main()
