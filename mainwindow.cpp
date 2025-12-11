@@ -17,8 +17,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&check_alive_timer, &QTimer::timeout, this, &MainWindow::aliveChecking);
     check_alive_timer.start();
 
-    connect(&serial, &QSerialPort::errorOccurred, this, &MainWindow::serialError);
-    connect(&serial, SIGNAL(readyRead()), this, SLOT(receive_data()));
+    connect(&serial, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::errorOccurred),
+            this, &MainWindow::serialError);    connect(&serial, SIGNAL(readyRead()), this, SLOT(receive_data()));
 
     render_timer = new QTimer(this);
     render_timer->setInterval(33);
@@ -26,8 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
     render_timer->start();
 
     watchdog_timer = new QTimer(this);
-    watchdog_timer->setInterval(3500);
-    connect(watchdog_timer, &QTimer::timeout, this, &MainWindow::on_watchdog_timeout);
+    watchdog_timer->setInterval(333500);
+    connect(watchdog_timer, &QTimer::timeout, this, &MainWindow::watchdog_timeout);
 
     blink_timer = new QTimer(this);
     blink_timer->setInterval(500);
@@ -75,10 +75,14 @@ void MainWindow::init_window()
         "QPushButton#spid_bt { color: #4CAF50; }"
         );
 
+    updateMotorStatusLed(false);
+
+
     update_port();
     update_baundrate();
     ui->baud_cb->setCurrentText("115200");
-    ui->dataBit_cb->setCurrentText("8");
+   // ui->dataBit_cb->setCurrentText("8");
+    ui->dataBit_cb->setCurrentIndex(3);
     ui->stopBit_cb->setCurrentText("1");
     ui->parity_cb->setCurrentText("No Parity");
 
@@ -105,14 +109,44 @@ bool MainWindow::isPortConnected(const QSerialPortInfo &portInfo) {
     return false;
 }
 
-void MainWindow::serialError()
+void MainWindow::serialError(QSerialPort::SerialPortError error)
 {
-    if(serial.error() && serial.isOpen())
+    if (error == QSerialPort::NoError) return;
+
+    if (!serial.isOpen()) return;
+
+    if (error == QSerialPort::ResourceError || error == QSerialPort::PermissionError)
     {
-        QString errorMessage = "Error: " + serial.errorString();
-        QMessageBox::critical(this, "Error", errorMessage);
-        on_connect_butt_clicked();
+        check_alive_timer.stop();
+        watchdog_timer->stop();
+
+        if (ui->connect_butt->text() == "DISCONNECT") {
+            on_connect_butt_clicked();
+        } else {
+            serial.close();
+        }
+
+        QMessageBox::critical(this, "Connection Error", "Device Disconnected! (Connection Lost)");
     }
+}
+void MainWindow::updateMotorStatusLed(bool isRunning)
+{
+    QString color = isRunning ? "#00FF00" : "#FF0000";
+    QString text  = isRunning ? "RUNNING" : "STOPPED";
+
+    QString style = QString(
+                        "background-color: %1; "
+                        "color: white; "
+                        "border: 2px solid #333; "
+                        "border-radius: 10px; "
+                        "font-weight: bold; "
+                        "font-size: 12px; "
+                        "padding: 5px;"
+                        ).arg(color);
+
+    ui->lb_motor_status->setAlignment(Qt::AlignCenter);
+    ui->lb_motor_status->setText(text);
+    ui->lb_motor_status->setStyleSheet(style);
 }
 
 void MainWindow::update_port()
@@ -200,7 +234,7 @@ void MainWindow::receive_data()
     }
 }
 
-void MainWindow::on_watchdog_timeout()
+void MainWindow::watchdog_timeout()
 {
     if (!serial.isOpen()) return;
 
@@ -437,7 +471,7 @@ void MainWindow::on_connect_butt_clicked()
         {
             QString errorMessage = "Cannot open " + ui->port_cb->currentText() + "\nError: " + serial.errorString();
             QMessageBox::critical(this, "Connection Error", errorMessage);
-
+            updateMotorStatusLed(false);
             ui->status_lb->setText("CONNECTION FAILED");
             ui->status_lb->setAlignment(Qt::AlignCenter);
             ui->status_lb->setStyleSheet("background-color: #ff6666; color: white; font-weight: bold; border-radius: 5px;");
@@ -502,6 +536,7 @@ void MainWindow::on_connect_butt_clicked()
 void MainWindow::on_stop_bt_clicked()
 {
     stop = true;
+    updateMotorStatusLed(false);
     QString msg = "M_STP" + formatData("");
     serial.write((msg ).toUtf8());
 
@@ -518,6 +553,7 @@ void MainWindow::on_spid_bt_clicked()
     valueBuff.clear(); errorBuff.clear();
     tick_timer.restart();
 
+
     QString kp = ui->kp_tb->text();
     QString ki = ui->ki_tb->text();
     QString kd = ui->kd_tb->text();
@@ -527,6 +563,15 @@ void MainWindow::on_spid_bt_clicked()
     if(ki.isEmpty()) ki = "0";
     if(kd.isEmpty()) kd = "0";
     if(sp.isEmpty()) sp = "0";
+
+
+
+
+    updateMotorStatusLed(true);
+
+
+
+
 
     refValue = sp.toFloat();
     QString payload = kp + " " + ki + " " + kd + " " + sp;

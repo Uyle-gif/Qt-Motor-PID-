@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1514</width>
-    <height>692</height>
+    <width>1536</width>
+    <height>714</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -359,19 +359,6 @@
       </rect>
      </property>
     </widget>
-    <widget class="QLabel" name="label_9">
-     <property name="geometry">
-      <rect>
-       <x>38</x>
-       <y>110</y>
-       <width>20</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Kd</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_10">
      <property name="geometry">
       <rect>
@@ -447,6 +434,19 @@
       <string>START</string>
      </property>
     </widget>
+    <widget class="QLabel" name="label_9">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>100</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Kd</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QCustomPlot" name="plot" native="true">
     <property name="geometry">
@@ -465,9 +465,9 @@
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>300</y>
+      <y>310</y>
       <width>391</width>
-      <height>321</height>
+      <height>331</height>
      </rect>
     </property>
     <property name="font">
@@ -490,7 +490,7 @@
        <x>20</x>
        <y>50</y>
        <width>171</width>
-       <height>211</height>
+       <height>221</height>
       </rect>
      </property>
     </widget>
@@ -498,7 +498,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>267</y>
+       <y>290</y>
        <width>80</width>
        <height>25</height>
       </rect>
@@ -513,7 +513,7 @@
        <x>200</x>
        <y>51</y>
        <width>171</width>
-       <height>211</height>
+       <height>221</height>
       </rect>
      </property>
     </widget>
@@ -534,7 +534,7 @@
      <property name="geometry">
       <rect>
        <x>200</x>
-       <y>270</y>
+       <y>293</y>
        <width>80</width>
        <height>25</height>
       </rect>
@@ -708,6 +708,19 @@
       <enum>QLCDNumber::Flat</enum>
      </property>
     </widget>
+    <widget class="QLabel" name="lb_motor_status">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>100</y>
+       <width>81</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -715,7 +728,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1514</width>
+     <width>1536</width>
      <height>25</height>
     </rect>
    </property>

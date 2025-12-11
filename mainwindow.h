@@ -52,18 +52,18 @@ private slots:
     void on_pwm_bt_clicked();
     void on_dir_bt_clicked();
 
+    void receive_data();
     void init_window();
     void update_port();
     void update_baundrate();
     bool isPortConnected(const QSerialPortInfo &portInfo);
-    void serialError();
-    void receive_data();
+    void serialError(QSerialPort::SerialPortError error);
     void plotSetting(QCustomPlot  *plot, const char* xLabel, const char * yLabel);
     void plotConfig();
     void aliveChecking();
     void update_gui_loop();
 
-    void on_watchdog_timeout();
+    void watchdog_timeout();
     void blink_error_loop();
 
 private:
@@ -97,6 +97,7 @@ private:
     bool is_rx_error;
 
     void setLedColor(QLabel *label, QString text, QString color);
+    void updateMotorStatusLed(bool isRunning);
 
 
 
