@@ -1,4 +1,4 @@
-# DC Motor PID Control System (STM32 + Qt GUI)
+# DC Motor PID Control (Qt GUI)
 
 A real-time DC motor speed control system using PID algorithm on STM32F4, monitored via a Qt C++ PC application.
 
